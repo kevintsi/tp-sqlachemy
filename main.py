@@ -22,15 +22,19 @@ try:
     engine.connect()
     print("---MySQL Docker Container Python connection ok---\n")
 except:
-    print("Something went wrong")
+    print("Something went wrong\n")
 
 
 subprocess = subprocess.Popen("sudo docker ps", shell=True, stdout=subprocess.PIPE)
 
 subprocess_return = subprocess.stdout.read()
 
-print("--- docker ps info ---")
-print(subprocess_return)
+print("--- docker ps info ---\n")
+print(subprocess_return,"\n")
+print("--- Data Mapping OK ---\n")
+for name in engine.table_names():
+    print("- {}\n".format(name))
+
 
 
 
