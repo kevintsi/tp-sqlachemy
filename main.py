@@ -23,36 +23,37 @@ try:
     engine = create_engine(connection_str)
     conn = engine.connect()
     print("---MySQL Docker Container Python connection ok---\n")
+
+    subprocess = subprocess.Popen("sudo docker ps", shell=True, stdout=subprocess.PIPE)
+
+    subprocess_return = subprocess.stdout.read()
+
+    print("--- docker ps info ---\n")
+    print(subprocess_return,"\n")
+
+    print("--- Data Mapping OK ---\n")
+    for name in engine.table_names():
+        print("- {}\n".format(name))
+
+    print("---  Selection of PAYMENTS table ---\n")
+    print("Type : {} \n".format(type(Payments.columns.customerNumber)))
+
+    print("Columns : {}\n\n".format(engine.table_names()))
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
+
+    print("### All payments with > 01 June 2005 : \n")
+    result = session.query(Payments).filter(Payments.c.paymentDate > "2005-06-01").all()
+
+    for row in result:
+        print("CustomerID : {} , CheckNumber : {}, PaymentDate : {}, Amount : {}".format(row.customerNumber, row.checkNumber, row.paymentDate, row.amount))
+
 except:
     print("Something went wrong\n")
-
-
-subprocess = subprocess.Popen("sudo docker ps", shell=True, stdout=subprocess.PIPE)
-
-subprocess_return = subprocess.stdout.read()
-
-print("--- docker ps info ---\n")
-print(subprocess_return,"\n")
-
-print("--- Data Mapping OK ---\n")
-for name in engine.table_names():
-    print("- {}\n".format(name))
-
-print("---  Selection of PAYMENTS table ---\n")
-print("Type : {} \n".format(type(Payments.columns.customerNumber)))
-
-print("Columns : {}\n\n".format(engine.table_names()))
-
-Session = sessionmaker()
-Session.configure(bind=engine)
-session = Session()
-
-print("### All payments with > 01 June 2005 : \n")
-result = session.query(Payments).filter(Payments.c.paymentDate > "2005-06-01").all()
-
-for row in result:
-    print("CustomerID : {} , CheckNumber : {}, PaymentDate : {}, Amount : {}".format(row.customerNumber, row.checkNumber, row.paymentDate, row.amount))
-
+finally:
+    session.close()
 
 
 
