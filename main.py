@@ -84,6 +84,8 @@ try:
 
     for row in result:
         print("{}\n".format(row))
+    
+    print("### 5. Déclarez le total")
 except Exception as e:
     print("Something went wrong : {}\n".format(e))
 finally:
