@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
+from sqlalchemy.sql.functions import func
 from sqlalchemy.orm import sessionmaker
 import subprocess
-from models import Payments
+from models import *
 
 config = {
     "host" : "localhost",
@@ -36,7 +37,7 @@ try:
         print("- {}\n".format(name))
 
     print("---  Selection of PAYMENTS table ---\n")
-    print("Type : {} \n".format(type(Payments.columns.customerNumber)))
+    print("Type : {} \n".format(type(Payment.columns.customerNumber)))
 
     print("Columns : {}\n\n".format(engine.table_names()))
 
@@ -45,13 +46,46 @@ try:
     session = Session()
 
     print("### All payments with > 01 June 2005 : \n")
-    result = session.query(Payments).filter(Payments.c.paymentDate > "2005-06-01").all()
+    result = session.query(Payment).filter(Payment.c.paymentDate > "2005-06-01").all()
 
     for row in result:
         print("CustomerID : {} , CheckNumber : {}, PaymentDate : {}, Amount : {}".format(row.customerNumber, row.checkNumber, row.paymentDate, row.amount))
 
-except:
-    print("Something went wrong\n")
+    print("### All products: \n")
+
+    result = session.query(Product).all()
+
+    for row in result:
+        print("{}\n".format(row))
+    
+    print("### 1. Préparez une liste de bureaux triés par pays, état, ville \n")
+
+    result = session.query(Office).order_by(Office.c.country, Office.c.state, Office.c.city)
+
+
+    for row in result:
+        print("{}\n".format(row))
+
+    print("### 2. Combien d'employés y-a-t-il dans l'entreprise ?\n")
+
+    result = session.query(Employee).count()
+
+    print("Il y a {} employés dans l'entreprise\n".format(result))
+
+    print("### 3. Quel est le total des paiements reçus ?\n")
+
+    result = session.query(func.sum(Payment.c.amount)).first()[0]
+
+    print("L'entreprise a reçue un total de {} de paiements\n".format(result))
+
+    print("### 4. Dressez la liste des lignes de produits contenant des 'Voitures'\n")
+
+    result = session.query(ProductLine).filter(ProductLine.c.productLine.like("%Cars%"))
+
+    for row in result:
+        print("{}\n".format(row))
+except Exception as e:
+    print("Something went wrong : {}\n".format(e))
 finally:
     session.close()
 
